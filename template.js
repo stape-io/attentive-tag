@@ -124,6 +124,7 @@ function generatePostBody() {
 
                 if (eventData.currency) content.price.currency = eventData.currency;
                 if (d.currency) content.price.currency = d.currency;
+                content.price = [content.price];
             }
 
             postBody.items.push(content);
