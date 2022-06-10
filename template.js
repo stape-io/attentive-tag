@@ -3,6 +3,9 @@ const JSON = require('JSON');
 const makeTableMap = require('makeTableMap');
 const getRequestHeader = require('getRequestHeader');
 const getAllEventData = require('getAllEventData');
+const makeString = require('makeString');
+const makeInteger = require('makeInteger');
+const makeNumber = require('makeNumber');
 
 const logToConsole = require('logToConsole');
 const getContainerVersion = require('getContainerVersion');
@@ -112,19 +115,24 @@ function generatePostBody() {
         eventData.items.forEach((d) => {
             let content = {};
 
-            if (d.item_id) content.productId = d.item_id;
-            if (d.item_variant) content.productVariantId = d.item_variant;
-            if (d.item_name) content.name = d.item_name;
-            if (d.item_image) content.productImage = d.item_image;
-            if (d.item_url) content.productUrl = d.item_url;
-            if (d.quantity) content.quantity = d.quantity;
+            if (d.item_id) content.productId = makeString(d.item_id);
+            if (d.item_variant) content.productVariantId = makeString(d.item_variant);
+            if (d.item_name) content.name = makeString(d.item_name);
+            if (d.item_image) content.productImage = makeString(d.item_image);
+            if (d.item_url) content.productUrl = makeString(d.item_url);
+            if (d.quantity) content.quantity = makeInteger(d.quantity);
 
             if (d.price) {
-                content.price = {value: d.price};
+                content.price = {value: makeNumber(d.price)};
 
-                if (eventData.currency) content.price.currency = eventData.currency;
-                if (d.currency) content.price.currency = d.currency;
+                if (eventData.currency) content.price.currency = makeString(eventData.currency);
+                if (d.currency) content.price.currency = makeString(d.currency);
                 content.price = [content.price];
+            } else {
+                content.price = [{
+                    value: 1,
+                    currency: 'USD'
+                }];
             }
 
             postBody.items.push(content);
