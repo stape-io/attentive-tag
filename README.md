@@ -2,7 +2,7 @@
 
 Attentive server to server events tracking tag. 
 
-### Description TBD
+Attentive tag for the server Google Tag Manager helps to track events using sGTM. You should have a message program at Attentive with SMS functionality to set up this tag.
 
 ## Open Source
 
