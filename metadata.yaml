@@ -1,4 +1,5 @@
-homepage: "https://stape.io/"
+homepage: 'https://stape.io/'
+documentation: 'https://github.com/stape-io/attentive-tag'
 versions:
   - sha: 57a72e9cb6506cfdfb42e2d366ad9551ca746bf9
     changeNotes: Update items parsing.

@@ -1,11 +1,20 @@
-﻿const sendHttpRequest = require('sendHttpRequest');
-const JSON = require('JSON');
-const makeTableMap = require('makeTableMap');
+﻿const getAllEventData = require('getAllEventData');
 const getRequestHeader = require('getRequestHeader');
-const getAllEventData = require('getAllEventData');
-const makeString = require('makeString');
+const JSON = require('JSON');
 const makeInteger = require('makeInteger');
 const makeNumber = require('makeNumber');
+const makeString = require('makeString');
+const makeTableMap = require('makeTableMap');
+const sendHttpRequest = require('sendHttpRequest');
+
+/*==============================================================================
+==============================================================================*/
+
+const eventData = getAllEventData();
+
+if (!isConsentGivenOrNotRequired(data, eventData)) {
+  return data.gtmOnSuccess();
+}
 
 const logToConsole = require('logToConsole');
 const getContainerVersion = require('getContainerVersion');
@@ -13,16 +22,13 @@ const containerVersion = getContainerVersion();
 const isDebug = containerVersion.debugMode;
 const isLoggingEnabled = determinateIsLoggingEnabled();
 const traceId = getRequestHeader('trace-id');
-
-const eventData = getAllEventData();
 const requestUrl = generateRequestUrl();
 const requestHeaders = {
   'Content-Type': 'application/json',
   Accept: 'application/json',
-  Authorization: 'Bearer ' + data.apiKey,
+  Authorization: 'Bearer ' + data.apiKey
 };
-const eventName =
-  data.eventType === 'custom' ? data.customEvent : data.eCommerceEvent;
+const eventName = data.eventType === 'custom' ? data.customEvent : data.eCommerceEvent;
 const postBody = generatePostBody();
 
 if (isLoggingEnabled) {
@@ -34,7 +40,7 @@ if (isLoggingEnabled) {
       EventName: eventName,
       RequestMethod: 'POST',
       RequestUrl: requestUrl,
-      RequestBody: postBody,
+      RequestBody: postBody
     })
   );
 }
@@ -51,7 +57,7 @@ sendHttpRequest(
           EventName: eventName,
           ResponseStatusCode: statusCode,
           ResponseHeaders: headers,
-          ResponseBody: body,
+          ResponseBody: body
         })
       );
     }
@@ -66,21 +72,9 @@ sendHttpRequest(
   JSON.stringify(postBody)
 );
 
-function determinateIsLoggingEnabled() {
-  if (!data.logType) {
-    return isDebug;
-  }
-
-  if (data.logType === 'no') {
-    return false;
-  }
-
-  if (data.logType === 'debug') {
-    return isDebug;
-  }
-
-  return data.logType === 'always';
-}
+/*==============================================================================
+  Vendor related functions
+==============================================================================*/
 
 function generateRequestUrl() {
   const url = 'https://api.attentivemobile.com/v1/events/';
@@ -102,7 +96,7 @@ function generateRequestUrl() {
 
 function generatePostBody() {
   const postBody = {
-    user: {},
+    user: {}
   };
 
   if (data.phone) postBody.user.phone = data.phone;
@@ -112,11 +106,7 @@ function generatePostBody() {
     postBody.type = data.customEvent;
 
     if (data.customProperties) {
-      postBody.properties = makeTableMap(
-        data.customProperties,
-        'name',
-        'value'
-      );
+      postBody.properties = makeTableMap(data.customProperties, 'name', 'value');
     }
 
     return postBody;
@@ -138,16 +128,15 @@ function generatePostBody() {
       if (d.price) {
         content.price = { value: makeNumber(d.price) };
 
-        if (eventData.currency)
-          content.price.currency = makeString(eventData.currency);
+        if (eventData.currency) content.price.currency = makeString(eventData.currency);
         if (d.currency) content.price.currency = makeString(d.currency);
         content.price = [content.price];
       } else {
         content.price = [
           {
             value: 1,
-            currency: 'USD',
-          },
+            currency: 'USD'
+          }
         ];
       }
 
@@ -156,4 +145,31 @@ function generatePostBody() {
   }
 
   return postBody;
+}
+
+/*==============================================================================
+Helpers
+==============================================================================*/
+
+function isConsentGivenOrNotRequired(data, eventData) {
+  if (data.adStorageConsent !== 'required') return true;
+  if (eventData.consent_state) return !!eventData.consent_state.ad_storage;
+  const xGaGcs = eventData['x-ga-gcs'] || ''; // x-ga-gcs is a string like "G110"
+  return xGaGcs[2] === '1';
+}
+
+function determinateIsLoggingEnabled() {
+  if (!data.logType) {
+    return isDebug;
+  }
+
+  if (data.logType === 'no') {
+    return false;
+  }
+
+  if (data.logType === 'debug') {
+    return isDebug;
+  }
+
+  return data.logType === 'always';
 }
