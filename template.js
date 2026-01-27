@@ -1,6 +1,8 @@
 ﻿const getAllEventData = require('getAllEventData');
+const getContainerVersion = require('getContainerVersion');
 const getRequestHeader = require('getRequestHeader');
 const JSON = require('JSON');
+const logToConsole = require('logToConsole');
 const makeInteger = require('makeInteger');
 const makeNumber = require('makeNumber');
 const makeString = require('makeString');
@@ -16,8 +18,6 @@ if (!isConsentGivenOrNotRequired(data, eventData)) {
   return data.gtmOnSuccess();
 }
 
-const logToConsole = require('logToConsole');
-const getContainerVersion = require('getContainerVersion');
 const containerVersion = getContainerVersion();
 const isDebug = containerVersion.debugMode;
 const isLoggingEnabled = determinateIsLoggingEnabled();
