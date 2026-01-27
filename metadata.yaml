@@ -1,7 +1,7 @@
 homepage: 'https://stape.io/'
 documentation: 'https://github.com/stape-io/attentive-tag'
 versions:
-  - sha: 8ca68fcaa317a2b2aff398a8a4db70e3af268fdf
+  - sha: 4924d3a6d624d6e084dd83b6e1bc3060a277dd8e
     changeNotes: Added consent management.
   - sha: 57a72e9cb6506cfdfb42e2d366ad9551ca746bf9
     changeNotes: Update items parsing.
