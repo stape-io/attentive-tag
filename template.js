@@ -1,8 +1,5 @@
 ﻿const getAllEventData = require('getAllEventData');
-const getContainerVersion = require('getContainerVersion');
-const getRequestHeader = require('getRequestHeader');
 const JSON = require('JSON');
-const logToConsole = require('logToConsole');
 const makeInteger = require('makeInteger');
 const makeNumber = require('makeNumber');
 const makeString = require('makeString');
@@ -18,10 +15,6 @@ if (!isConsentGivenOrNotRequired(data, eventData)) {
   return data.gtmOnSuccess();
 }
 
-const containerVersion = getContainerVersion();
-const isDebug = containerVersion.debugMode;
-const isLoggingEnabled = determinateIsLoggingEnabled();
-const traceId = getRequestHeader('trace-id');
 const requestUrl = generateRequestUrl();
 const requestHeaders = {
   'Content-Type': 'application/json',
@@ -31,37 +24,9 @@ const requestHeaders = {
 const eventName = data.eventType === 'custom' ? data.customEvent : data.eCommerceEvent;
 const postBody = generatePostBody();
 
-if (isLoggingEnabled) {
-  logToConsole(
-    JSON.stringify({
-      Name: 'Attentive',
-      Type: 'Request',
-      TraceId: traceId,
-      EventName: eventName,
-      RequestMethod: 'POST',
-      RequestUrl: requestUrl,
-      RequestBody: postBody
-    })
-  );
-}
-
 sendHttpRequest(
   requestUrl,
   (statusCode, headers, body) => {
-    if (isLoggingEnabled) {
-      logToConsole(
-        JSON.stringify({
-          Name: 'Attentive',
-          Type: 'Response',
-          TraceId: traceId,
-          EventName: eventName,
-          ResponseStatusCode: statusCode,
-          ResponseHeaders: headers,
-          ResponseBody: body
-        })
-      );
-    }
-
     if (statusCode >= 200 && statusCode < 300) {
       data.gtmOnSuccess();
     } else {
@@ -156,20 +121,4 @@ function isConsentGivenOrNotRequired(data, eventData) {
   if (eventData.consent_state) return !!eventData.consent_state.ad_storage;
   const xGaGcs = eventData['x-ga-gcs'] || ''; // x-ga-gcs is a string like "G110"
   return xGaGcs[2] === '1';
-}
-
-function determinateIsLoggingEnabled() {
-  if (!data.logType) {
-    return isDebug;
-  }
-
-  if (data.logType === 'no') {
-    return false;
-  }
-
-  if (data.logType === 'debug') {
-    return isDebug;
-  }
-
-  return data.logType === 'always';
 }
